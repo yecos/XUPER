@@ -8,7 +8,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
@@ -61,16 +63,19 @@ private fun SettingsScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 RadioButton(
                     selected = selected == code,
                     onClick = {
                         selected = code
-                        prefs.edit().apply {
-                            if (code == "auto") remove(XuperApp.KEY_LANGUAGE)
-                            else putString(XuperApp.KEY_LANGUAGE, code)
-                        }.apply()
+                        val editor = prefs.edit()
+                        if (code == "auto") {
+                            editor.remove(XuperApp.KEY_LANGUAGE)
+                        } else {
+                            editor.putString(XuperApp.KEY_LANGUAGE, code)
+                        }
+                        editor.apply()
                         // Recrear la actividad para aplicar el idioma
                         (ctx as? ComponentActivity)?.recreate()
                     },
