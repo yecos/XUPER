@@ -61,6 +61,7 @@ class SessionInterceptor : Interceptor {
     }
 
     companion object {
-        const val USER_AGENT = "XuperHydra/4.35.0 (Android TV; ${DeviceManager.deviceManufacturer} ${DeviceManager.deviceModel})"
+        // No puede ser const porque depende de DeviceManager (runtime)
+        val USER_AGENT: String get() = "XuperHydra/4.35.0 (Android TV; ${DeviceManager.deviceManufacturer} ${DeviceManager.deviceModel})"
     }
 }

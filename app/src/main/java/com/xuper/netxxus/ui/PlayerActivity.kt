@@ -138,12 +138,11 @@ private fun PlayerScreen(
             val mediaItemBuilder = MediaItem.Builder()
                 .setUri(streamUrl)
 
-            // Configurar DRM si hay license URL
+            // Configurar DRM si hay license URL (Widevine)
             if (licenseUrl.isNotBlank()) {
-                val drmConfig = androidx.media3.common.MediaItem.DrmConfiguration.Builder(
-                    Uri.parse(licenseUrl)
-                )
-                    .setForceSessionsLicense(false)
+                val drmConfig = androidx.media3.common.MediaItem.DrmConfiguration.Builder()
+                    .setSchemeUuid(DrmManager.WIDEVINE_UUID)
+                    .setLicenseUri(licenseUrl)
                     .build()
                 mediaItemBuilder.setDrmConfiguration(drmConfig)
             }
