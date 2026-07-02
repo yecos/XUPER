@@ -1,5 +1,6 @@
 package com.xuper.netxxus.data.api
 
+import com.xuper.netxxus.data.session.SessionInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -16,8 +17,6 @@ import java.util.concurrent.TimeUnit
  *  1. Llama al servidor DCS inicial (URL descifrada de strings.xml)
  *  2. Recibe la lista de URLs reales (portal, epg, ads, etc.)
  *  3. Usa esas URLs para todas las llamadas siguientes
- *
- * Para emular esto en el proyecto nuevo, ver `BootstrapManager.kt`.
  */
 object ApiClient {
 
@@ -37,33 +36,18 @@ object ApiClient {
      */
     var epgBaseUrl: String = ""
 
-    /**
-     * Token de autenticación del usuario (después de login).
-     */
-    var authToken: String = ""
-
     private val okHttpClient: OkHttpClient by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         OkHttpClient.Builder()
+            .addInterceptor(SessionInterceptor())  // Auth + device headers
             .addInterceptor(logging)
-            .addInterceptor { chain ->
-                val req = chain.request().newBuilder()
-                    .apply {
-                        if (authToken.isNotEmpty()) {
-                            addHeader("Authorization", "Bearer $authToken")
-                        }
-                        addHeader("User-Agent", "XuperHydra/4.35.0 (Android TV)")
-                        addHeader("X-Device-Id", DeviceId.get())
-                    }
-                    .build()
-                chain.proceed(req)
-            }
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
             .build()
     }
 
@@ -74,23 +58,5 @@ object ApiClient {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(XuperApi::class.java)
-    }
-}
-
-/**
- * Genera / recupera un ID único de dispositivo (persistent across installs).
- */
-object DeviceId {
-    private const val PREFS = "xuper_prefs"
-    private const val KEY = "device_id"
-
-    fun get(): String {
-        val prefs = com.xuper.netxxus.XuperApp.instance
-            .getSharedPreferences(PREFS, android.content.Context.MODE_PRIVATE)
-        return prefs.getString(KEY, null) ?: run {
-            val newId = java.util.UUID.randomUUID().toString()
-            prefs.edit().putString(KEY, newId).apply()
-            newId
-        }
     }
 }
