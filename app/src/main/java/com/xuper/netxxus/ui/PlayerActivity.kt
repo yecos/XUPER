@@ -140,11 +140,11 @@ private fun PlayerScreen(
 
             // Configurar DRM si hay license URL (Widevine)
             if (licenseUrl.isNotBlank()) {
-                val drmConfig = androidx.media3.common.MediaItem.DrmConfiguration.Builder()
-                    .setSchemeUuid(DrmManager.WIDEVINE_UUID)
-                    .setLicenseUri(licenseUrl)
-                    .build()
-                mediaItemBuilder.setDrmConfiguration(drmConfig)
+                // API Media3 1.4: DrmConfiguration.Builder() es privado,
+                // se construye vía MediaItem.Builder().setDrmConfiguration(lambda)
+                mediaItemBuilder.setDrmConfiguration(
+                    androidx.media3.common.MediaItem.DrmConfiguration.Builder(licenseUrl).build()
+                )
             }
 
             exoPlayer.setMediaItem(mediaItemBuilder.build())
