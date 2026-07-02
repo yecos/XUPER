@@ -149,6 +149,7 @@ dependencies {
 
     // DataStore (preferencias, idioma, sesión)
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.preference:preference-ktx:1.2.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

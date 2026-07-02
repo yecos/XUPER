@@ -85,9 +85,8 @@ object DeviceId {
     private const val KEY = "device_id"
 
     fun get(): String {
-        val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(
-            com.xuper.netxxus.XuperApp.instance
-        )
+        val prefs = com.xuper.netxxus.XuperApp.instance
+            .getSharedPreferences(PREFS, android.content.Context.MODE_PRIVATE)
         return prefs.getString(KEY, null) ?: run {
             val newId = java.util.UUID.randomUUID().toString()
             prefs.edit().putString(KEY, newId).apply()
