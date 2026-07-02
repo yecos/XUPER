@@ -123,6 +123,9 @@ dependencies {
     implementation("androidx.tv:tv-foundation:1.0.0-alpha10")
     implementation("androidx.tv:tv-material:1.0.0")
 
+    // Material Components for Android (XML themes — proves Theme.Material3.*)
+    implementation("com.google.android.material:material:1.12.0")
+
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.1")
 
