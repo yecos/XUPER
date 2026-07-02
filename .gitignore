@@ -1,0 +1,46 @@
+# ============================================================
+# XUPER — .gitignore
+# ============================================================
+
+# --- Android / Gradle ---
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+.cxx/
+captures/
+.externalNativeBuild/
+
+# --- Keystore (NUNCA commitear) ---
+*.jks
+*.keystore
+keystore.properties
+
+# --- APKs / AABs (mejor como GitHub Releases) ---
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# --- Logs / tmp ---
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+
+# --- Android Studio ---
+.navigation/
+captures/
+output.json
+
+# --- Kotlin ---
+*.kotlin_metadata
+*.kotlin_builtins
+
+# --- Otros ---
+.env
+secrets.properties
+google-services.json

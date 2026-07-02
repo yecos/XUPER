@@ -1,0 +1,73 @@
+package com.xuper.netxxus.ui
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.sp
+import com.xuper.netxxus.R
+import com.xuper.netxxus.ui.theme.XuperHydraTheme
+
+/**
+ * Lista de canales en vivo.
+ * Reemplaza a `com.live.ui.activity.LiveFreeActivity` de la APK original.
+ */
+class LiveActivity : ComponentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            XuperHydraTheme {
+                LiveScreen()
+            }
+        }
+    }
+}
+
+@Composable
+private fun LiveScreen() {
+    val channels = listOf(
+        "Canal Deportes HD" to "En vivo ahora · Fútbol",
+        "Canal Cine" to "En vivo · Película",
+        "Canal Noticias" to "En vivo · Noticiero",
+        "Canal Kids" to "En vivo · Anime",
+        "Canal Documentales" to "En vivo · Naturaleza",
+        "Canal Música" to "En vivo · Concierto"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(24.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.nav_live),
+            color = Color.White,
+            fontSize = 32.sp
+        )
+        Text(
+            text = "${channels.size} canales disponibles",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        LazyColumn {
+            items(channels) { (name, desc) ->
+                Row(Modifier.padding(vertical = 8.dp)) {
+                    Text(name, color = Color.White, fontSize = 18.sp, modifier = Modifier.padding(end = 12.dp))
+                    Text(desc, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+                }
+            }
+        }
+    }
+}

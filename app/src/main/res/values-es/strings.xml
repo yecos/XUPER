@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App branding (ES) -->
+    <string name="app_name">Xuper Hydra</string>
+
+    <!-- Nav -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_live">TV en vivo</string>
+    <string name="nav_movies">Películas</string>
+    <string name="nav_series">Series</string>
+    <string name="nav_mine">Mi cuenta</string>
+    <string name="nav_search">Buscar</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <!-- Home categories -->
+    <string name="home_category_all">Todo</string>
+    <string name="home_category_new">Novedades</string>
+    <string name="home_category_top">Populares</string>
+    <string name="home_category_show">Programas</string>
+    <string name="home_category_sports">Deportes</string>
+    <string name="home_category_music">Música</string>
+    <string name="home_category_air">En vivo</string>
+    <string name="home_category_genera">General</string>
+
+    <!-- Login -->
+    <string name="login_title">Iniciar sesión</string>
+    <string name="login_account_hint">Cuenta o correo electrónico</string>
+    <string name="login_password_hint">Contraseña</string>
+    <string name="login_button">Entrar</string>
+    <string name="login_failed">Error al iniciar sesión, inténtalo de nuevo o contacta a tu distribuidor.</string>
+
+    <!-- VOD -->
+    <string name="vod_play">Reproducir</string>
+    <string name="vod_trailer">Tráiler</string>
+    <string name="vod_add_to_list">Añadir a Mi lista</string>
+    <string name="vod_episodes">Episodios</string>
+    <string name="vod_related">Relacionado</string>
+    <string name="vod_download">Descargar</string>
+    <string name="vod_share">Compartir</string>
+
+    <!-- Player -->
+    <string name="player_loading">Cargando…</string>
+    <string name="player_error">Error de reproducción. Inténtalo de nuevo.</string>
+    <string name="player_subtitle_track">Subtítulos</string>
+    <string name="player_audio_track">Audio</string>
+
+    <!-- Mine -->
+    <string name="mine_membership">Membresía</string>
+    <string name="mine_expire">Vence el: %1$s</string>
+    <string name="mine_renew">Renovar</string>
+    <string name="mine_history">Historial de pedidos</string>
+    <string name="mine_invite">Invitar amigos</string>
+    <string name="mine_logout">Cerrar sesión</string>
+
+    <!-- Settings -->
+    <string name="settings_language">Idioma</string>
+    <string name="settings_language_es">Español</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_auto">Automático (sistema)</string>
+    <string name="settings_about">Acerca de Xuper</string>
+    <string name="settings_about_title">Acerca de Xuper</string>
+    <string name="settings_about_info">Xuper TV está dedicado a proporcionar a los usuarios muchos recursos de alta calidad. Aquí encontrarás miles de películas, series, anime y canales en vivo, todo en un solo lugar. Ofrecemos una experiencia de visualización estable, fluida, diversa y continuamente actualizada.</string>
+
+    <!-- Error codes -->
+    <string name="error_code_neterror">Error de red, verifica tu conexión</string>
+    <string name="error_code_net_type">Error de red (%1$s)</string>
+    <string name="error_code_play_type">Error de reproducción (%1$s)</string>
+    <string name="error_code_user_type">Error de usuario (%1$s)</string>
+
+    <!-- Misc -->
+    <string name="please_scan">Por favor escanea</string>
+    <string name="scan_qr">Escanear código QR</string>
+    <string name="scan_qr_login">Escanear para iniciar sesión</string>
+    <string name="N_A">N/D</string>
+    <string name="default_notification_channel_id">xuper_default</string>
+</resources>

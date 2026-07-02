@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- ============================================================
+         XUPER HYDRA — Tema base Material 3 (streaming oscuro)
+         ============================================================ -->
+    <style name="Theme.XuperHydra" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowBackground">@color/color_bg_primary</item>
+        <item name="android:colorBackground">@color/color_bg_primary</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowSoftInputMode">adjustNothing</item>
+
+        <!-- Colores MD3 -->
+        <item name="colorPrimary">@color/color_main</item>
+        <item name="colorOnPrimary">@color/color_text_primary</item>
+        <item name="colorPrimaryContainer">@color/color_main_dim</item>
+        <item name="colorOnPrimaryContainer">@color/color_text_primary</item>
+        <item name="colorSecondary">@color/color_text_secondary</item>
+        <item name="colorOnSecondary">@color/color_text_primary</item>
+
+        <!-- Background -->
+        <item name="android:colorBackground">@color/color_bg_primary</item>
+        <item name="colorOnBackground">@color/color_text_primary</item>
+        <item name="colorSurface">@color/color_bg_secondary</item>
+        <item name="colorOnSurface">@color/color_text_primary</item>
+        <item name="colorSurfaceVariant">@color/color_bg_tertiary</item>
+        <item name="colorOnSurfaceVariant">@color/color_text_secondary</item>
+
+        <!-- Error -->
+        <item name="colorError">@color/color_error</item>
+        <item name="colorOnError">@color/color_text_primary</item>
+
+        <!-- Status / nav bar -->
+        <item name="android:statusBarColor">@color/color_bg_primary</item>
+        <item name="android:navigationBarColor">@color/color_bg_primary</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <!-- Welcome / splash -->
+    <style name="Theme.XuperHydra.Welcome" parent="Theme.XuperHydra">
+        <item name="android:windowBackground">@color/color_bg_primary</item>
+    </style>
+</resources>

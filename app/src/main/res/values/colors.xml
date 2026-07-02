@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ============================================================
+         XUPER HYDRA — Paleta Streaming Oscuro (MD3)
+         Estilo: Netflix / Prime Video / Disney+
+         negro profundo + rojo brillante + blanco puro
+         ============================================================ -->
+
+    <!-- Marca -->
+    <color name="color_main">#FFE50914</color>            <!-- Rojo Xuper brillante -->
+    <color name="color_main_pressed">#FFB20710</color>    <!-- Rojo oscuro (pulsado) -->
+    <color name="color_main_dim">#80E50914</color>        <!-- Rojo con 50% alpha -->
+
+    <!-- Superficies -->
+    <color name="color_bg_primary">#FF0A0A0A</color>      <!-- Negro profundo -->
+    <color name="color_bg_secondary">#FF141414</color>    <!-- Cards / elevadas -->
+    <color name="color_bg_tertiary">#FF1F1F1F</color>     <!-- Hover / focus -->
+    <color name="color_bg_elevated">#FF2A2A2A</color>     <!-- Diálogos / sheets -->
+
+    <!-- Texto -->
+    <color name="color_text_primary">#FFFFFFFF</color>    <!-- Blanco puro -->
+    <color name="color_text_secondary">#FFB3B3B3</color>  <!-- Gris claro -->
+    <color name="color_text_disabled">#FF707070</color>
+    <color name="color_text_accent">#FFE50914</color>
+
+    <!-- Bordes -->
+    <color name="color_divider">#FF2A2A2A</color>
+    <color name="color_border_focus">#FFE50914</color>
+
+    <!-- Estado -->
+    <color name="color_success">#FF46D369</color>         <!-- Verde Netflix-style -->
+    <color name="color_warning">#FFFFB700</color>
+    <color name="color_error">#FFE50914</color>
+    <color name="color_info">#FF2196F3</color>
+
+    <!-- Compatibilidad con código legacy (NO borrar) -->
+    <color name="color_0b0b0b">#FF0A0A0A</color>
+    <color name="color_1a1a1a">#FF141414</color>
+    <color name="color_app_name">#FFFFFFFF</color>
+    <color name="color_b3b3b3">#FFB3B3B3</color>
+    <color name="color_ff3333">#FFE50914</color>
+    <color name="color_ff5500">#FFE50914</color>
+    <color name="color_font_main">#FFFFFFFF</color>
+    <color name="color_main_66">#66E50914</color>
+</resources>
