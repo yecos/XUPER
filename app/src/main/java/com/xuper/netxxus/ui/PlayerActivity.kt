@@ -140,10 +140,11 @@ private fun PlayerScreen(
 
             // Configurar DRM si hay license URL (Widevine)
             if (licenseUrl.isNotBlank()) {
-                // API Media3 1.4: DrmConfiguration.Builder() es privado,
-                // se construye vía MediaItem.Builder().setDrmConfiguration(lambda)
+                // API Media3 1.4: Builder requiere UUID del scheme (Widevine)
                 mediaItemBuilder.setDrmConfiguration(
-                    androidx.media3.common.MediaItem.DrmConfiguration.Builder(licenseUrl).build()
+                    androidx.media3.common.MediaItem.DrmConfiguration.Builder(DrmManager.WIDEVINE_UUID)
+                        .setLicenseUri(licenseUrl)
+                        .build()
                 )
             }
 
