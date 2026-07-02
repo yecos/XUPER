@@ -1,0 +1,171 @@
+# ============================================================
+# Xuper Hydra — Release APK (firmada)
+# Se ejecuta cuando se pushea un tag v*.*.* o manualmente.
+# Genera una APK release firmada y la sube como GitHub Release.
+#
+# REQUIERE configurar estos SECRETS en el repo:
+#   SIGNING_KEYSTORE_BASE64  — keystore .jks en base64 (ver README)
+#   SIGNING_STORE_PASSWORD   — password del keystore
+#   SIGNING_KEY_ALIAS        — alias de la clave
+#   SIGNING_KEY_PASSWORD     — password de la clave
+# ============================================================
+name: Release APK (signed)
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Nombre del tag a crear (ej: v4.35.1)'
+        required: true
+        default: 'v4.35.1'
+
+jobs:
+  build-release:
+    name: Build & Release signed APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write   # Necesario para crear el release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-release-${{ hashFiles('**/*.gradle*', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-release-
+
+      # ============================================================
+      # Decodificar keystore desde secret base64
+      # ============================================================
+      - name: Decode signing keystore
+        if: env.SIGNING_KEYSTORE_BASE64 != ''
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+        run: |
+          echo "$SIGNING_KEYSTORE_BASE64" | base64 -d > $HOME/release.keystore
+          echo "Keystore decodificado:"
+          ls -lh $HOME/release.keystore
+
+      - name: Build release APK
+        env:
+          SIGNING_STORE_FILE: ${{ env.HOME }}/release.keystore
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          if [ -f $HOME/release.keystore ]; then
+            echo "✅ Keystore encontrado, compilando release firmada"
+            ./gradlew assembleRelease --no-daemon --stacktrace
+            APK_PATH=app/build/outputs/apk/release/*.apk
+          else
+            echo "⚠️  No hay keystore, compilando release con debug signing"
+            ./gradlew assembleRelease --no-daemon --stacktrace
+            APK_PATH=app/build/outputs/apk/release/*.apk
+          fi
+          echo "APK_PATH=$APK_PATH" >> $GITHUB_ENV
+
+      - name: Sign APK with apksigner (fallback si no firmó Gradle)
+        if: env.SIGNING_KEYSTORE_BASE64 != ''
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          # Verificar si la APK ya está firmada
+          APKSIGNER=$ANDROID_HOME/build-tools/34.0.0/apksigner
+          if ! $APKSIGNER verify --verbose app/build/outputs/apk/release/app-release.apk 2>&1 | grep -q "Verifies"; then
+            echo "APK no firmada, firmando con apksigner..."
+            $ANDROID_HOME/build-tools/34.0.0/zipalign -p -f -v 4 \
+              app/build/outputs/apk/release/app-release.apk \
+              app/build/outputs/apk/release/app-release-aligned.apk
+            $APKSIGNER sign \
+              --ks $HOME/release.keystore \
+              --ks-key-alias "$SIGNING_KEY_ALIAS" \
+              --ks-pass pass:"$SIGNING_STORE_PASSWORD" \
+              --key-pass pass:"$SIGNING_KEY_PASSWORD" \
+              --out app/build/outputs/apk/release/xuper-hydra-release.apk \
+              app/build/outputs/apk/release/app-release-aligned.apk
+            rm app/build/outputs/apk/release/app-release.apk
+            mv app/build/outputs/apk/release/xuper-hydra-release.apk app/build/outputs/apk/release/app-release.apk
+          fi
+          $APKSIGNER verify --verbose app/build/outputs/apk/release/app-release.apk
+
+      - name: Rename APK with version
+        run: |
+          VERSION=$(grep -oE 'versionName = "[^"]+"' app/build.gradle.kts | head -1 | cut -d'"' -f2)
+          cp app/build/outputs/apk/release/app-release.apk \
+             xuper-hydra-${VERSION}.apk
+          ls -lh xuper-hydra-*.apk
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: xuper-hydra-release-apk
+          path: xuper-hydra-*.apk
+          retention-days: 90
+          if-no-files-found: error
+
+      # ============================================================
+      # Crear GitHub Release automáticamente
+      # ============================================================
+      - name: Determine tag name
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "name=${{ inputs.tag_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: Xuper Hydra ${{ steps.tag.outputs.name }}
+          files: xuper-hydra-*.apk
+          body: |
+            ## 🎨 Xuper Hydra ${{ steps.tag.outputs.name }}
+
+            APK firmada generada automáticamente por GitHub Actions.
+
+            ### Instalación
+            1. Desinstala la app oficial Xuper Hydra (firma distinta)
+            2. `adb install xuper-hydra-${{ env.VERSION }}.apk`
+            3. O copia el .apk al TV Box y ábrelo con un file manager
+
+            ### Cambios
+            Ver commits desde el último release.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Show build info
+        run: |
+          echo "### Release ${{ steps.tag.outputs.name }} publicada :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "APK: \`xuper-hydra-${{ env.VERSION }}.apk\`" >> $GITHUB_STEP_SUMMARY
+          ls -lh xuper-hydra-*.apk >> $GITHUB_STEP_SUMMARY

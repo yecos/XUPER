@@ -1,8 +1,20 @@
 // Xuper Hydra — app/build.gradle.kts
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+}
+
+// ============================================================
+// Firma release — lee keystore.properties (local) o env vars (CI)
+// ============================================================
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -16,11 +28,33 @@ android {
         versionCode = 43500
         versionName = "4.35.0-redesign"
 
-        // Mantener multidex (la app original usa 3 archivos dex)
         multiDexEnabled = true
-
-        // AppOptimized para Android TV
         vectorDrawables { useSupportLibrary = true }
+    }
+
+    // ============================================================
+    // Signing configs
+    // - debug: usa el debug keystore por defecto de Android
+    // - release: usa keystore.properties (local) o env vars (CI)
+    // ============================================================
+    signingConfigs {
+        create("release") {
+            // Prioridad 1: keystore.properties (local)
+            if (keystoreProperties.isNotEmpty()) {
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+            }
+            // Prioridad 2: env vars (GitHub Actions / CI)
+            val envStoreFile = System.getenv("SIGNING_STORE_FILE")
+            if (!envStoreFile.isNullOrEmpty() && file(envStoreFile).exists()) {
+                storeFile = file(envStoreFile)
+                storePassword = System.getenv("SIGNING_STORE_PASSWORD")
+                keyAlias = System.getenv("SIGNING_KEY_ALIAS")
+                keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -30,8 +64,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Firmar con keystore del redesign (mismo que APK modificada)
-            signingConfig = signingConfigs.getByName("debug")  // Para producción: crear signingConfig release
+            // Firmar release solo si hay keystore configurado;
+            // si no, cae al debug signing (para pruebas locales)
+            signingConfig = signingConfigs.findByName("release")?.let {
+                if (it.storeFile != null) it else null
+            } ?: signingConfigs.getByName("debug")
         }
         debug {
             applicationIdSuffix = ".debug"
@@ -39,7 +76,6 @@ android {
         }
     }
 
-    // Mantener compatibilidad con Java 8
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -55,6 +91,16 @@ android {
     }
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+    }
+
+    // APKs por ABI para reducir tamaño (opcional, útil para TV Box ARM)
+    splits {
+        abi {
+            isEnable = false  // Cambiar a true para generar APKs separadas por ABI
+            reset()
+            include("arm64-v8a", "armeabi-v7a")
+            isUniversalApk = true
+        }
     }
 }
 
@@ -100,11 +146,6 @@ dependencies {
 
     // DataStore (preferencias, idioma, sesión)
     implementation("androidx.datastore:datastore-preferences:1.1.1")
-
-    // Firebase (opcional — descomentar si integras push)
-    // implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
-    // implementation("com.google.firebase:firebase-messaging")
-    // implementation("com.google.firebase:firebase-crashlytics-ktx")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

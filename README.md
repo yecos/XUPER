@@ -10,45 +10,116 @@ Proyecto de rediseño y mejora de la app Android **Xuper Hydra** (IPTV/VOD para 
 
 ```
 XUPER/
-├── app/                              ← Proyecto Android Studio (Kotlin + Compose + MD3)
-│   ├── build.gradle.kts
+├── .github/workflows/                  ← CI/CD con GitHub Actions
+│   ├── build-apk.yml                   ← Build debug en cada push
+│   └── release-apk.yml                 ← Release firmada en tags
+├── app/                                ← Proyecto Android Studio
+│   ├── build.gradle.kts                ← Configuración Gradle + signing
 │   ├── proguard-rules.pro
 │   └── src/main/
 │       ├── AndroidManifest.xml
-│       ├── java/com/xuper/netxxus/
-│       │   ├── XuperApp.kt           ← Application class
-│       │   └── ui/
-│       │       ├── WelcomeActivity.kt
-│       │       ├── HomeActivity.kt
-│       │       ├── VodDetailsActivity.kt
-│       │       ├── LiveActivity.kt
-│       │       ├── PlayerActivity.kt
-│       │       ├── LoginActivity.kt
-│       │       ├── MineActivity.kt
-│       │       ├── SettingsActivity.kt   ← Selector de idioma ES/EN/Auto
-│       │       ├── SearchActivity.kt
-│       │       ├── AboutActivity.kt
-│       │       └── theme/
-│       │           ├── Color.kt
-│       │           ├── Type.kt
-│       │           └── Theme.kt
-│       └── res/
-│           ├── values/colors.xml         ← Paleta streaming oscuro
-│           ├── values/themes.xml         ← Theme.Material3.Dark
-│           ├── values/strings.xml        ← EN
-│           ├── values-es/strings.xml     ← ES
-│           ├── values-en/strings.xml     ← EN explícito
-│           └── xml/                       ← Configuraciones
+│       ├── java/com/xuper/netxxus/     ← 11 activities Kotlin + Compose
+│       └── res/                        ← Paleta streaming oscuro + ES/EN
 ├── docs/
-│   ├── ANALISIS-APK-ORIGINAL.md         ← Análisis técnico de la APK original
-│   └── ITERACION-1-REDESIGN.md          ← Detalle de cambios de la iteración 1
+│   ├── ANALISIS-APK-ORIGINAL.md
+│   └── ITERACION-1-REDESIGN.md
 ├── scripts/
-│   └── apply_redesign.py                ← Script que aplica los cambios a la APK decompilada
+│   └── apply_redesign.py
+├── gradle/wrapper/                     ← Wrapper (jar + properties)
+├── gradlew, gradlew.bat                ← Scripts wrapper
 ├── build.gradle.kts
 ├── settings.gradle.kts
 ├── gradle.properties
 └── .gitignore
 ```
+
+---
+
+## 🤖 Compilar la APK con GitHub Actions (sin instalar nada)
+
+Tienes dos workflows configurados:
+
+### 1. **Build Debug** — automático en cada push
+
+Cada vez que haces `git push` a `main`, GitHub Actions compila automáticamente
+una APK debug y la publica como **artifact** descargable.
+
+**Pasos:**
+1. Haz push de tus cambios
+2. Ve a https://github.com/yecos/XUPER/actions
+3. Espera a que termine el workflow "Build APK (debug)"
+4. Haz clic en la ejecución → descarga el artifact `xuper-hydra-debug-apk`
+5. ¡Instala la APK en tu TV Box!
+
+> La APK debug está firmada con el keystore debug de Android (no necesita configuración).
+
+### 2. **Release Firmada** — en cada tag `v*.*.*`
+
+Para generar una APK release firmada (instalable sin desinstalar versiones debug anteriores),
+necesitas configurar **4 secrets** en GitHub con tu keystore:
+
+#### Paso 1 — Generar keystore local (una sola vez)
+```bash
+keytool -genkeypair \
+  -keystore xuper-release.keystore \
+  -alias xuper -keyalg RSA -keysize 2048 -validity 10000 \
+  -storepass TU_PASSWORD -keypass TU_PASSWORD \
+  -dname "CN=XuperHydra, OU=Dev, O=XuperHydra, L=Bogota, ST=Cundinamarca, C=CO"
+```
+
+> ⚠️ **Guarda este `.jks` en lugar seguro**. Si lo pierdes no podrás actualizar la app.
+
+#### Paso 2 — Subir secrets a GitHub
+Ve a https://github.com/yecos/XUPER/settings/secrets/actions y agrega:
+
+| Secret | Valor |
+|---|---|
+| `SIGNING_KEYSTORE_BASE64` | Salida de `base64 -w0 xuper-release.keystore` |
+| `SIGNING_STORE_PASSWORD` | Password del keystore |
+| `SIGNING_KEY_ALIAS` | `xuper` (o el alias que elegiste) |
+| `SIGNING_KEY_PASSWORD` | Password de la clave |
+
+Para generar el base64 del keystore:
+```bash
+# Linux/Mac
+base64 -w0 xuper-release.keystore
+
+# Windows (PowerShell)
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("xuper-release.keystore"))
+```
+
+#### Paso 3 — Disparar el release
+```bash
+git tag v4.35.1
+git push origin v4.35.1
+```
+O desde la web: **Actions tab → Release APK (signed) → Run workflow**.
+
+GitHub Actions hará todo automáticamente:
+1. Compilará la APK release
+2. La firmará con tu keystore
+3. Creará un GitHub Release con la APK adjunta
+
+### 3. **Compilar localmente** (alternativa)
+
+Si prefieres compilar en tu PC con Android Studio:
+
+1. Clona el repo:
+   ```bash
+   git clone https://github.com/yecos/XUPER.git
+   ```
+2. Abre la carpeta en **Android Studio Hedgehog (2023.1.1) o superior**
+3. Espera a que Gradle sincronice (5–10 min la primera vez)
+4. **Run → Run 'app'** (debug) o **Build → Generate Signed Bundle / APK** (release)
+
+Para release local, crea un archivo `keystore.properties` en la raíz del proyecto:
+```properties
+storeFile=/ruta/absoluta/a/xuper-release.keystore
+storePassword=TU_PASSWORD
+keyAlias=xuper
+keyPassword=TU_PASSWORD
+```
+> Ya está en `.gitignore`, no se subirá al repo.
 
 ---
 
@@ -64,35 +135,6 @@ XUPER/
 | Texto secundario | Gris claro | `#B3B3B3` |
 | Estado: éxito | Verde | `#46D369` |
 | Estado: error | Rojo | `#E50914` |
-
----
-
-## 🚀 Cómo empezar
-
-### Opción A — Compilar el proyecto Android Studio
-
-1. Clona este repo en tu PC:
-   ```bash
-   git clone https://github.com/yecos/XUPER.git
-   ```
-2. Abre la carpeta en **Android Studio Hedgehog (2023.1.1) o superior**
-3. Espera a que Gradle sincronice (5–10 min la primera vez)
-4. Conecta tu TV Box / Fire Stick / emulador Android TV
-5. **Run → Run 'app'** (la APK debug se instala con sufijo `.debug`)
-
-### Opción B — Instalar la APK rediseñada (sin compilar)
-
-Descarga la APK desde [Releases](https://github.com/yecos/XUPER/releases), luego:
-
-```bash
-# 1. Desinstala la app oficial (firma distinta)
-adb uninstall com.xuper.netxxus
-
-# 2. Instala la nueva
-adb install xuper-redesign.apk
-```
-
-O copia el `.apk` al TV Box y ábrelo con un file manager.
 
 ---
 
@@ -117,6 +159,7 @@ La app es **bilingüe ES/EN con auto-detección**:
 - 11 activities Compose implementadas
 - Proyecto Android Studio funcional
 - APK rediseñada compilada y firmada (ver Releases)
+- **CI/CD con GitHub Actions configurado**
 
 ### 🔜 Próximas iteraciones sugeridas
 - **Iteración 2**: Integrar ExoPlayer real en `PlayerActivity`
@@ -129,12 +172,9 @@ La app es **bilingüe ES/EN con auto-detección**:
 
 ## 🔐 Notas de seguridad
 
-- **El keystore NO está en este repo** (está en `.gitignore`). Cada desarrollador debe generar el suyo:
-  ```bash
-  keytool -genkeypair -keystore app/xuper-release.keystore \
-    -alias xuper -keyalg RSA -keysize 2048 -validity 10000
-  ```
-- La APK rediseñada está firmada con un keystore distinto al original → hay que desinstalar la app oficial antes de instalarla.
+- **El keystore NUNCA se commitea** (`.gitignore` excluye `*.jks`, `*.keystore`, `keystore.properties`).
+- Los secrets se configuran en GitHub Settings → Secrets and variables → Actions.
+- La APK release está firmada con tu keystore personal → solo tú puedes publicar updates.
 - La app permite cleartext traffic (`network_security_config.xml`) — mismo comportamiento que la original.
 
 ---
@@ -144,3 +184,4 @@ La app es **bilingüe ES/EN con auto-detección**:
 - [`docs/ANALISIS-APK-ORIGINAL.md`](docs/ANALISIS-APK-ORIGINAL.md) — Análisis técnico completo de la APK original
 - [`docs/ITERACION-1-REDESIGN.md`](docs/ITERACION-1-REDESIGN.md) — Detalle de los cambios de la iteración 1
 - [`scripts/apply_redesign.py`](scripts/apply_redesign.py) — Script que aplica el rediseño a la APK decompilada
+- [**Actions tab**](https://github.com/yecos/XUPER/actions) — Ver builds en curso y descargar artifacts

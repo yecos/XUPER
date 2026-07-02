@@ -16,6 +16,7 @@ captures/
 *.jks
 *.keystore
 keystore.properties
+keystore.properties.local
 
 # --- APKs / AABs (mejor como GitHub Releases) ---
 *.apk
