@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "com.xuper.netxxus"
-        minSdk = 19
+        minSdk = 21   // Coil 2.x requiere 21 (Android 5.0 Lollipop, >99% de dispositivos)
         targetSdk = 34
         versionCode = 43500
         versionName = "4.35.0-redesign"
