@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import com.xuper.netxxus.R
 import com.xuper.netxxus.ui.theme.XuperHydraTheme
+import androidx.compose.ui.unit.dp
 
 /**
  * Lista de canales en vivo.

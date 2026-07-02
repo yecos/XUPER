@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.sp
 import com.xuper.netxxus.R
 import com.xuper.netxxus.ui.theme.XuperHydraTheme
 import com.xuper.netxxus.ui.theme.XuperRed
+import androidx.compose.ui.unit.dp
 
 /**
  * Pantalla "Mi cuenta".
