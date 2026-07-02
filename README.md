@@ -18,20 +18,50 @@ XUPER/
 │   ├── proguard-rules.pro
 │   └── src/main/
 │       ├── AndroidManifest.xml
-│       ├── java/com/xuper/netxxus/     ← 11 activities Kotlin + Compose
+│       ├── java/com/xuper/netxxus/
+│       │   ├── XuperApp.kt
+│       │   ├── ui/                      ← 11 activities Compose
+│       │   └── data/
+│       │       ├── api/
+│       │       │   ├── XuperApi.kt      ← Interfaz Retrofit (esqueleto)
+│       │       │   └── ApiClient.kt     ← Cliente + interceptores
+│       │       └── model/
+│       │           └── Models.kt        ← Data classes (esqueleto)
 │       └── res/                        ← Paleta streaming oscuro + ES/EN
+├── tools/
+│   ├── mitmproxy/                      ← (vacío) descarga certificados aquí
+│   ├── frida/
+│   │   └── ssl-bypass.js               ← Script bypass SSL pinning
+│   └── analyze_traffic.py              ← Analiza .flow/.har y extrae endpoints
 ├── docs/
 │   ├── ANALISIS-APK-ORIGINAL.md
-│   └── ITERACION-1-REDESIGN.md
+│   ├── ITERACION-1-REDESIGN.md
+│   └── CAPTURA-TRAFICO.md              ← Guía completa mitmproxy + Frida
 ├── scripts/
 │   └── apply_redesign.py
-├── gradle/wrapper/                     ← Wrapper (jar + properties)
-├── gradlew, gradlew.bat                ← Scripts wrapper
+├── gradle/wrapper/
+├── gradlew, gradlew.bat
 ├── build.gradle.kts
 ├── settings.gradle.kts
 ├── gradle.properties
 └── .gitignore
 ```
+
+---
+
+## 🔬 Captura de tráfico con mitmproxy (para wire-up real)
+
+Para que la app funcione con el backend real de Xuper, necesitamos capturar
+los endpoints del backend original. Setup completo en [`docs/CAPTURA-TRAFICO.md`](docs/CAPTURA-TRAFICO.md).
+
+**Resumen del flujo:**
+1. Instalar mitmproxy en el PC
+2. Instalar certificado CA en el dispositivo Android (root)
+3. Configurar proxy en Android
+4. Bypass SSL pinning con Frida (script `tools/frida/ssl-bypass.js`)
+5. Navegar la app original y capturar tráfico
+6. Ejecutar `python3 tools/analyze_traffic.py captura.flow`
+7. Pegar endpoints en `app/src/main/java/com/xuper/netxxus/data/api/XuperApi.kt`
 
 ---
 
