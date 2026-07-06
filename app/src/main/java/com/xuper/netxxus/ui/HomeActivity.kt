@@ -1,5 +1,6 @@
 package com.xuper.netxxus.ui
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,8 +29,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.xuper.netxxus.R
+import com.xuper.netxxus.ui.theme.ThemeConfig
 import com.xuper.netxxus.ui.theme.XuperHydraTheme
-import com.xuper.netxxus.ui.theme.XuperRed
+import com.xuper.netxxus.ui.theme.xuperColors
+
+/** Actividad base que carga el tema desde assets/theme-config.json */
+abstract class BaseThemeActivity : ComponentActivity() {
+    protected lateinit var themeConfig: ThemeConfig
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        themeConfig = ThemeConfig.fromAssets(this)
+        super.onCreate(savedInstanceState)
+    }
+}
 
 /**
  * Pantalla principal (Home).
@@ -40,12 +52,12 @@ import com.xuper.netxxus.ui.theme.XuperRed
  *  - Carruseles horizontales (Live, Películas, Series, etc.)
  *  - Banner superior con destacado
  */
-class HomeActivity : ComponentActivity() {
+class HomeActivity : BaseThemeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            XuperHydraTheme {
+            XuperHydraTheme(this) {
                 HomeScreen()
             }
         }

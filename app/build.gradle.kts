@@ -6,6 +6,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20"
 }
 
 // ============================================================
@@ -148,8 +149,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
     // DataStore (preferencias, idioma, sesión)
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("androidx.preference:preference-ktx:1.2.1")
+        implementation("androidx.datastore:datastore-preferences:1.1.1")
+        implementation("androidx.preference:preference-ktx:1.2.1")
 
-    debugImplementation("androidx.compose.ui:ui-tooling")
+        // Serialization (para theme-config.json)
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+        debugImplementation("androidx.compose.ui:ui-tooling")
 }

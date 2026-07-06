@@ -65,6 +65,52 @@ los endpoints del backend original. Setup completo en [`docs/CAPTURA-TRAFICO.md`
 
 ---
 
+## 🎨 Sistema de Temas Personalizables (NUEVO)
+
+XUPER HYDRA incluye un **sistema completo de temas** que te permite cambiar la "cara" visual de la app (colores, tipografía, formas, layout, features) **sin tocar código Kotlin**.
+
+### 🚀 Inicio rápido
+
+```bash
+# Ver temas disponibles
+ls app/src/main/assets/theme-*.json
+
+# Compilar tema rojo localmente
+./build-theme.sh theme-red.json debug -red
+
+# O en Windows
+build-theme.bat theme-red.json debug -red
+```
+
+### ☁️ Compilar en GitHub Actions (gratis)
+
+1. Ve a **Actions → Build APK (Custom Themes) → Run workflow**
+2. Elige tu tema (`theme-red.json`, `theme-blue.json`, tu propio `theme-mi-marca.json`)
+3. Elige `debug` o `release`
+4. Click **Run workflow** → Descarga el APK en Artifacts
+
+### 📖 Documentación completa
+
+Ver [`docs/TEMAS-PERSONALIZABLES.md`](docs/TEMAS-PERSONALIZABLES.md) para:
+- Estructura del JSON de tema
+- Cómo crear tu propia paleta Material 3
+- Feature flags para activar/desactivar pantallas
+- Hot-reload en tiempo de ejecución
+- Previews en Android Studio
+
+### Temas incluidos
+
+| Archivo | Estilo |
+|---------|--------|
+| `theme-config.json` | Xuper Hydra original (rojo Netflix) |
+| `theme-red.json` | Rojo intenso + acento dorado |
+| `theme-blue.json` | Azul corporativo + cyan |
+| `theme-green.json` | Verde "Spotify" + lima |
+| `theme-purple.json` | Púrpura premium + rosa |
+| `theme-dark.json` | Blanco/negro puro minimalista |
+
+---
+
 ## 🤖 Compilar la APK con GitHub Actions (sin instalar nada)
 
 Tienes dos workflows configurados:
@@ -213,5 +259,6 @@ La app es **bilingüe ES/EN con auto-detección**:
 
 - [`docs/ANALISIS-APK-ORIGINAL.md`](docs/ANALISIS-APK-ORIGINAL.md) — Análisis técnico completo de la APK original
 - [`docs/ITERACION-1-REDESIGN.md`](docs/ITERACION-1-REDESIGN.md) — Detalle de los cambios de la iteración 1
+- [`docs/TEMAS-PERSONALIZABLES.md`](docs/TEMAS-PERSONALIZABLES.md) — **Guía completa del sistema de temas personalizables**
 - [`scripts/apply_redesign.py`](scripts/apply_redesign.py) — Script que aplica el rediseño a la APK decompilada
 - [**Actions tab**](https://github.com/yecos/XUPER/actions) — Ver builds en curso y descargar artifacts

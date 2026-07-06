@@ -1,0 +1,143 @@
+# ============================================================
+# Xuper Hydra — Build APK with Custom Themes
+# Permite compilar APKs con diferentes temas (theme-config.json)
+# Se ejecuta manualmente o en push a main/tags.
+# ============================================================
+name: Build APK (Custom Themes)
+
+on:
+  workflow_dispatch:
+    inputs:
+      theme-config:
+        description: 'Nombre del archivo de tema en assets/ (ej: theme-config.json, theme-red.json, theme-blue.json)'
+        required: true
+        default: 'theme-config.json'
+        type: choice
+        options:
+          - theme-config.json
+          - theme-red.json
+          - theme-blue.json
+          - theme-green.json
+          - theme-purple.json
+          - theme-dark.json
+      build-type:
+        description: 'Tipo de build'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+      version-suffix:
+        description: 'Sufijo para versionName (ej: -red, -custom)'
+        required: false
+        default: ''
+        type: string
+  push:
+    branches: [ main ]
+    paths:
+      - 'app/src/main/assets/theme-*.json'
+      - 'app/src/main/java/com/xuper/netxxus/ui/theme/**'
+      - '.github/workflows/build-custom-theme.yml'
+
+jobs:
+  build-custom-theme:
+    name: Build ${{ github.event.inputs.build-type || 'debug' }} APK (${{ github.event.inputs.theme-config || 'theme-config.json' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        # Permite compilar múltiples temas en paralelo si se desea
+        include:
+          - theme: theme-config.json
+            suffix: ''
+          - theme: theme-red.json
+            suffix: '-red'
+          - theme: theme-blue.json
+            suffix: '-blue'
+          - theme: theme-green.json
+            suffix: '-green'
+          - theme: theme-purple.json
+            suffix: '-purple'
+          - theme: theme-dark.json
+            suffix: '-dark'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ matrix.theme }}-${{ hashFiles('**/*.gradle*', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-${{ matrix.theme }}-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Prepare theme config
+        id: theme-config
+        run: |
+          THEME_FILE="${{ matrix.theme }}"
+          SUFFIX="${{ matrix.suffix }}"
+          
+          # Si es workflow_dispatch, usar el input del usuario
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            THEME_FILE="${{ github.event.inputs.theme-config }}"
+            SUFFIX="${{ github.event.inputs.version-suffix }}"
+          fi
+          
+          echo "theme_file=$THEME_FILE" >> $GITHUB_OUTPUT
+          echo "suffix=$SUFFIX" >> $GITHUB_OUTPUT
+          
+          # Copiar el theme-config seleccionado como theme-config.json activo
+          if [ -f "app/src/main/assets/$THEME_FILE" ]; then
+            cp "app/src/main/assets/$THEME_FILE" "app/src/main/assets/theme-config.json"
+            echo "Usando tema: $THEME_FILE"
+          else
+            echo "⚠️ Tema $THEME_FILE no encontrado, usando default"
+          fi
+
+      - name: Build APK
+        run: |
+          ./gradlew assemble${{ steps.theme-config.outputs.suffix != '' && 'Release' || 'Debug' }} \
+            -PversionSuffix="${{ steps.theme-config.outputs.suffix }}" \
+            --no-daemon --stacktrace
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: xuper-hydra-${{ steps.theme-config.outputs.suffix != '' && steps.theme-config.outputs.suffix || 'default' }}-${{ github.event.inputs.build-type || 'debug' }}-apk
+          path: app/build/outputs/apk/**/*.apk
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Show build info
+        run: |
+          THEME="${{ steps.theme-config.outputs.theme_file }}"
+          SUFFIX="${{ steps.theme-config.outputs.suffix }}"
+          echo "### Build OK :white_check_mark:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tema:** \`$THEME\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Sufijo:** \`$SUFFIX\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Tipo:** ${{ github.event.inputs.build-type || 'debug' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "APKs generadas:" >> $GITHUB_STEP_SUMMARY
+          ls -lh app/build/outputs/apk/**/*.apk >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Descárgalas desde **Artifacts** al final de esta ejecución." >> $GITHUB_STEP_SUMMARY

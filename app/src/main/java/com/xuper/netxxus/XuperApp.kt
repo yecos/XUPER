@@ -4,12 +4,14 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
+import com.xuper.netxxus.ui.theme.XuperThemeHolder
 import java.util.Locale
 
 /**
  * Application class — reemplaza a `com.interactive.brasiliptv.app.AppWrapper` de la APK original.
  *
  * Aquí inicializamos:
+ *  - Tema personalizable (desde assets/theme-config.json)
  *  - Idioma (auto-detección del sistema o el guardado por el usuario)
  *  - Tema oscuro por defecto (coherente con la paleta streaming-oscuro)
  *  - Cualquier librería global ( Retrofit, DataStore, etc. )
@@ -19,6 +21,9 @@ class XuperApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+
+        // Inicializar tema personalizable desde assets
+        XuperThemeHolder.initialize(this)
 
         // Forzar modo oscuro (la paleta es streaming-oscuro por diseño)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
